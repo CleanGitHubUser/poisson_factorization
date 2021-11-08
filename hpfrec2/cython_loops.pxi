@@ -9,6 +9,7 @@ import ctypes
 
 from libc.stdio cimport printf
 from pathlib import Path
+import sys
 
 ## Note: As of the end of 2018, MSVC is still stuck with OpenMP 2.0 (released 2002), which does not support
 ## parallel for loops with unsigend iterators. If you are using a different compiler, this part can be safely removed
@@ -646,7 +647,8 @@ cdef void update_G_n_L_rt_par(
                     exp_T_dot_B[i] += G_sh[tmp_ix * k + j] / G_rt[tmp_ix * k + j] * L_sh[ix_i[i] * k + j] / L_rt[
                         ix_i[i] * k + j]
             with gil:
-                print('update_G_n_L_rt (' + str(count) + ' / ' + str(k * (nU + nI)) + ')', end = "\r")
+                sys.stdout.write('\rupdate_G_n_L_rt (' + str(count) + ' / ' + str(k * (nU + nI)) + ')')
+                # print('update_G_n_L_rt (' + str(count) + ' / ' + str(k * (nU + nI)) + ')', end = '\r')
                 count += 1
         for tmp_ix in range(nI):
 
@@ -663,8 +665,10 @@ cdef void update_G_n_L_rt_par(
                     exp_T_dot_B[i] += G_sh[ix_u[i] * k + j] / G_rt[ix_u[i] * k + j] * L_sh[tmp_ix * k + j] / L_rt[
                         tmp_ix * k + j]
             with gil:
-                print('update_G_n_L_rt (' + str(count) + ' / ' + str(k * (nU + nI)) + ')', end = "\r")
+                sys.stdout.write('\rupdate_G_n_L_rt (' + str(count) + ' / ' + str(k * (nU + nI)) + ')')
                 count += 1
+    with gil:
+        sys.stdout.write('\r')
 
 @cython.boundscheck(False)
 @cython.wraparound(False)

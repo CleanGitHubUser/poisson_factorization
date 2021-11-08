@@ -17,7 +17,7 @@ print(df.shape)
 
 import math
 
-k = 50
+k = 1
 mean_y = 3.52986
 shape_para = 20
 a = shape_para
@@ -38,8 +38,8 @@ recommender = HPF(k=k, a=a, a_prime=a_prime, b_prime=b_prime,
                   reindex=True,
                   allow_inconsistent_math=True,
                   ncores=-1,
-                  # approx_rte=False,
-                  approx_rte=True,
+                  approx_rte=False,
+                  # approx_rte=True,
                   cut_extreme_initial=0.1,
                   save_folder='D:/poisson_factorization')
 recommender.fit(df)
