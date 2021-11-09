@@ -631,10 +631,12 @@ cdef void update_G_n_L_rt_par(
     cdef real_t tmp_G_rt
     cdef real_t tmp_L_rt
     cdef int count = 1
+    cdef real_t tmp_time
 
     for j in range(k):
         for tmp_ix in range(nU):
-
+            with gil:
+                tmp_time = time.time()
             tmp_G_rt = G_rt[tmp_ix * k + j]
             G_rt[tmp_ix * k + j] = k_sh / k_rt[tmp_ix]
             for i in prange(nY, schedule='dynamic', num_threads=nthreads):
@@ -647,11 +649,12 @@ cdef void update_G_n_L_rt_par(
                     exp_T_dot_B[i] += G_sh[tmp_ix * k + j] / G_rt[tmp_ix * k + j] * L_sh[ix_i[i] * k + j] / L_rt[
                         ix_i[i] * k + j]
             with gil:
-                sys.stdout.write('\rupdate_G_n_L_rt (' + str(count) + ' / ' + str(k * (nU + nI)) + ')')
-                # print('update_G_n_L_rt (' + str(count) + ' / ' + str(k * (nU + nI)) + ')', end = '\r')
+                tmp_time -= time.time()
+                sys.stdout.write('\rupdate_G_n_L_rt (%d / %d) %.2f iter / s' % (count, k * (nU + nI), 1 / abs(tmp_time)))
                 count += 1
         for tmp_ix in range(nI):
-
+            with gil:
+                tmp_time = time.time()
             tmp_L_rt = L_rt[tmp_ix * k + j]
             L_rt[tmp_ix * k + j] = t_sh / t_rt[tmp_ix]
 
@@ -665,7 +668,8 @@ cdef void update_G_n_L_rt_par(
                     exp_T_dot_B[i] += G_sh[ix_u[i] * k + j] / G_rt[ix_u[i] * k + j] * L_sh[tmp_ix * k + j] / L_rt[
                         tmp_ix * k + j]
             with gil:
-                sys.stdout.write('\rupdate_G_n_L_rt (' + str(count) + ' / ' + str(k * (nU + nI)) + ')')
+                tmp_time -= time.time()
+                sys.stdout.write('\rupdate_G_n_L_rt (%d / %d) %.2f iter / s' % (count, k * (nU + nI), 1 / abs(tmp_time)))
                 count += 1
     with gil:
         sys.stdout.write('\r')

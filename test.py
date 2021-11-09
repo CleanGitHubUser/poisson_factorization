@@ -17,7 +17,7 @@ print(df.shape)
 
 import math
 
-k = 1
+k = 50
 mean_y = 3.52986
 shape_para = 20
 a = shape_para
