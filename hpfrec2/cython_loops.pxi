@@ -389,6 +389,7 @@ def fit_hpf(real_t a, real_t a_prime, real_t b_prime,
                     &ix_u[0], &ix_i[0], nY, k, nthreads
                 )
             else:
+                tmp_time = time.time()
                 update_G_n_L_rt_par(
                     &exp_T_dot_B[0],
                     &Gamma_shp[0, 0], &Gamma_rte[0, 0],
@@ -399,6 +400,8 @@ def fit_hpf(real_t a, real_t a_prime, real_t b_prime,
                     nY, k, nU, nI,
                     &Y[0], nthreads
                 )
+                tmp_time -= time.time()
+                print('update_G_n_L %.2f s' % (abs(tmp_time)))
 
             # np.nan_to_num(Gamma_rte, copy=False)
             # np.nan_to_num(Lambda_rte, copy=False)
@@ -630,13 +633,13 @@ cdef void update_G_n_L_rt_par(
     cdef ind_type i, j, tmp_ix
     cdef real_t tmp_G_rt
     cdef real_t tmp_L_rt
-    cdef int count = 1
-    cdef real_t tmp_time
+    # cdef int count = 1
+    # cdef real_t tmp_time
 
     for j in range(k):
         for tmp_ix in range(nU):
-            with gil:
-                tmp_time = time.time()
+            # with gil:
+            #     tmp_time = time.time()
             tmp_G_rt = G_rt[tmp_ix * k + j]
             G_rt[tmp_ix * k + j] = k_sh / k_rt[tmp_ix]
             for i in prange(nY, schedule='dynamic', num_threads=nthreads):
@@ -648,13 +651,13 @@ cdef void update_G_n_L_rt_par(
                     exp_T_dot_B[i] -= G_sh[tmp_ix * k + j] / tmp_G_rt * L_sh[ix_i[i] * k + j] / L_rt[ix_i[i] * k + j]
                     exp_T_dot_B[i] += G_sh[tmp_ix * k + j] / G_rt[tmp_ix * k + j] * L_sh[ix_i[i] * k + j] / L_rt[
                         ix_i[i] * k + j]
-            with gil:
-                tmp_time -= time.time()
-                sys.stdout.write('\rupdate_G_n_L_rt (%d / %d) %.2f iter / s' % (count, k * (nU + nI), 1 / abs(tmp_time)))
-                count += 1
+            # with gil:
+            #     tmp_time -= time.time()
+            #     sys.stdout.write('\rupdate_G_n_L_rt (%d / %d) %.2f iter / s' % (count, k * (nU + nI), 1 / abs(tmp_time)))
+            #     count += 1
         for tmp_ix in range(nI):
-            with gil:
-                tmp_time = time.time()
+            # with gil:
+            #     tmp_time = time.time()
             tmp_L_rt = L_rt[tmp_ix * k + j]
             L_rt[tmp_ix * k + j] = t_sh / t_rt[tmp_ix]
 
@@ -667,12 +670,12 @@ cdef void update_G_n_L_rt_par(
                     exp_T_dot_B[i] -= G_sh[ix_u[i] * k + j] / G_rt[ix_u[i] * k + j] * L_sh[tmp_ix * k + j] / tmp_L_rt
                     exp_T_dot_B[i] += G_sh[ix_u[i] * k + j] / G_rt[ix_u[i] * k + j] * L_sh[tmp_ix * k + j] / L_rt[
                         tmp_ix * k + j]
-            with gil:
-                tmp_time -= time.time()
-                sys.stdout.write('\rupdate_G_n_L_rt (%d / %d) %.2f iter / s' % (count, k * (nU + nI), 1 / abs(tmp_time)))
-                count += 1
-    with gil:
-        sys.stdout.write('\r')
+    #         with gil:
+    #             tmp_time -= time.time()
+    #             sys.stdout.write('\rupdate_G_n_L_rt (%d / %d) %.2f iter / s' % (count, k * (nU + nI), 1 / abs(tmp_time)))
+    #             count += 1
+    # with gil:
+    #     sys.stdout.write('\r')
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
