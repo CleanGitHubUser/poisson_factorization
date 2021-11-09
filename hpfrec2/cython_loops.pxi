@@ -633,8 +633,8 @@ cdef void update_G_n_L_rt_par(
     cdef ind_type i, j, tmp_ix
     cdef real_t tmp_G_rt
     cdef real_t tmp_L_rt
-    # cdef int count = 1
-    # cdef real_t tmp_time
+    cdef int count = 1
+    cdef real_t tmp_time
 
     for j in range(k):
         for tmp_ix in range(nU):
@@ -642,11 +642,11 @@ cdef void update_G_n_L_rt_par(
                 tmp_time = time.time()
             tmp_G_rt = G_rt[tmp_ix * k + j]
             G_rt[tmp_ix * k + j] = k_sh / k_rt[tmp_ix]
-            for i in prange(nY, schedule='dynamic', num_threads=nthreads):
+            for i in prange(nY, schedule='static', num_threads=nthreads):
                 if ix_u[i] == <ind_type> tmp_ix:
                     G_rt[tmp_ix * k + j] += Y[i] * L_sh[ix_i[i] * k + j] / L_rt[ix_i[i] * k + j] / exp_T_dot_B[i]
 
-            for i in prange(nY, schedule='dynamic', num_threads=nthreads):
+            for i in prange(nY, schedule='static', num_threads=nthreads):
                 if ix_u[i] == <ind_type> tmp_ix:
                     exp_T_dot_B[i] -= G_sh[tmp_ix * k + j] / tmp_G_rt * L_sh[ix_i[i] * k + j] / L_rt[ix_i[i] * k + j]
                     exp_T_dot_B[i] += G_sh[tmp_ix * k + j] / G_rt[tmp_ix * k + j] * L_sh[ix_i[i] * k + j] / L_rt[
@@ -661,11 +661,11 @@ cdef void update_G_n_L_rt_par(
             tmp_L_rt = L_rt[tmp_ix * k + j]
             L_rt[tmp_ix * k + j] = t_sh / t_rt[tmp_ix]
 
-            for i in prange(nY, schedule='dynamic', num_threads=nthreads):
+            for i in prange(nY, schedule='static', num_threads=nthreads):
                 if ix_i[i] == <ind_type> tmp_ix:
                     L_rt[tmp_ix * k + j] += Y[i] * G_sh[ix_u[i] * k + j] / G_rt[ix_u[i] * k + j] / exp_T_dot_B[i]
 
-            for i in prange(nY, schedule='dynamic', num_threads=nthreads):
+            for i in prange(nY, schedule='static', num_threads=nthreads):
                 if ix_i[i] == <ind_type> tmp_ix:
                     exp_T_dot_B[i] -= G_sh[ix_u[i] * k + j] / G_rt[ix_u[i] * k + j] * L_sh[tmp_ix * k + j] / tmp_L_rt
                     exp_T_dot_B[i] += G_sh[ix_u[i] * k + j] / G_rt[ix_u[i] * k + j] * L_sh[tmp_ix * k + j] / L_rt[

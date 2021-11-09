@@ -1,24 +1,25 @@
 import numpy as np, pandas as pd
 
-df = pd.read_csv('MovieLens_100K.csv')
+df = pd.read_csv('D:/poisson_factorization/data/ml-1m/MovieLens_1M.csv')
 
 # print(df.head(5))
 
-from sklearn.model_selection import train_test_split
-
-train, test = train_test_split(df, test_size=.2)
-users_train = set(train.UserId)
-items_train = set(train.ItemId)
-test = test.loc[test.UserId.isin(users_train) & test.ItemId.isin(items_train)].reset_index(drop=True)
-del users_train, items_train
+# from sklearn.model_selection import train_test_split
+#
+# train, test = train_test_split(df, test_size=.2)
+# users_train = set(train.UserId)
+# items_train = set(train.ItemId)
+# test = test.loc[test.UserId.isin(users_train) & test.ItemId.isin(items_train)].reset_index(drop=True)
+# del users_train, items_train
 # del df
-print(df.shape)
+# print(df.shape)
 # print(train.head(5))
 
 import math
 
-k = 1
-mean_y = 3.52986
+k = 50
+# mean_y = 3.52986
+mean_y = 3.581564
 shape_para = 20
 a = shape_para
 a_prime = shape_para
@@ -37,7 +38,7 @@ recommender = HPF(k=k, a=a, a_prime=a_prime, b_prime=b_prime,
                   maxiter=100,
                   reindex=True,
                   allow_inconsistent_math=True,
-                  ncores=1,
+                  ncores=-1,
                   approx_rte=False,
                   # approx_rte=True,
                   cut_extreme_initial=0.1,
