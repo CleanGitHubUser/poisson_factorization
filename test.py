@@ -1,6 +1,7 @@
 import numpy as np, pandas as pd
 
-df = pd.read_csv('D:/poisson_factorization/data/ml-1m/MovieLens_1M.csv')
+# df = pd.read_csv('MovieLens_100K.csv')
+# df = pd.read_csv('D:/poisson_factorization/data/ml-1m/MovieLens_1M.csv')
 
 # print(df.head(5))
 
@@ -18,9 +19,8 @@ df = pd.read_csv('D:/poisson_factorization/data/ml-1m/MovieLens_1M.csv')
 import math
 
 k = 50
-# mean_y = 3.52986
-mean_y = 3.581564
-shape_para = 20
+mean_y = df['Count'].mean()
+shape_para = 5e3
 a = shape_para
 a_prime = shape_para
 b_prime = a / math.sqrt(mean_y / k)
@@ -35,7 +35,7 @@ recommender = HPF(k=k, a=a, a_prime=a_prime, b_prime=b_prime,
                   check_every=5,
                   stop_thr=1e-10,
                   # stop_crit='maxiter',
-                  maxiter=100,
+                  maxiter=1000,
                   reindex=True,
                   allow_inconsistent_math=True,
                   ncores=-1,

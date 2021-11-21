@@ -413,8 +413,8 @@ def fit_hpf(real_t a, real_t a_prime, real_t b_prime,
             # np.savetxt('D:/updating_parameter/parameter/Lambda_rte_' + str(i + 1) + '.csv', Lambda_rte, delimiter=',')
             # print('update_G_n_L_rt ' + str(i + 1) + '-th iter: OK')
 
-            Theta[:, :] = Gamma_shp / Gamma_rte
-            Beta[:, :] = Lambda_shp / Lambda_rte
+            Theta[:, :] = (Gamma_shp - 1) / Gamma_rte
+            Beta[:, :] = (Lambda_shp - 1) / Lambda_rte
 
             # np.nan_to_num(Theta, copy=False)
             # np.nan_to_num(Beta, copy=False)
@@ -528,7 +528,7 @@ cdef void calc_exp_T_dot_B_par(
     for j in range(k):
         for i in prange(nY, schedule='static', num_threads=nthreads):
             # for i in range(nY):
-            exp_T_dot_B[i] += G_sh[ix_u[i] * k + j] / G_rt[ix_u[i] * k + j] * L_sh[ix_i[i] * k + j] / L_rt[
+            exp_T_dot_B[i] += (G_sh[ix_u[i] * k + j] - 1) / G_rt[ix_u[i] * k + j] * (L_sh[ix_i[i] * k + j] - 1) / L_rt[
                 ix_i[i] * k + j]
 
 @cython.boundscheck(False)
@@ -648,12 +648,12 @@ cdef void update_G_n_L_rt_par(
 
             for i in prange(nY, schedule='static', num_threads=nthreads):
                 if ix_u[i] == <ind_type> tmp_ix:
-                    exp_T_dot_B[i] -= G_sh[tmp_ix * k + j] / tmp_G_rt * L_sh[ix_i[i] * k + j] / L_rt[ix_i[i] * k + j]
-                    exp_T_dot_B[i] += G_sh[tmp_ix * k + j] / G_rt[tmp_ix * k + j] * L_sh[ix_i[i] * k + j] / L_rt[
+                    exp_T_dot_B[i] -= (G_sh[tmp_ix * k + j] - 1) / tmp_G_rt * (L_sh[ix_i[i] * k + j] - 1) / L_rt[ix_i[i] * k + j]
+                    exp_T_dot_B[i] += (G_sh[tmp_ix * k + j] - 1) / G_rt[tmp_ix * k + j] * (L_sh[ix_i[i] * k + j] - 1) / L_rt[
                         ix_i[i] * k + j]
             with gil:
                 tmp_time -= time.time()
-                sys.stdout.write('\rupdate_G_n_L_rt (%d / %d) %.2f iter / s' % (count, k * (nU + nI), 1 / abs(tmp_time)))
+                sys.stdout.write('\rupdate_G_n_L_rt (%d / %d) %10.2f iter / micro s' % (count, k * (nU + nI), 1 / (abs(tmp_time) * 1e6)))
                 count += 1
         for tmp_ix in range(nI):
             with gil:
@@ -667,12 +667,12 @@ cdef void update_G_n_L_rt_par(
 
             for i in prange(nY, schedule='static', num_threads=nthreads):
                 if ix_i[i] == <ind_type> tmp_ix:
-                    exp_T_dot_B[i] -= G_sh[ix_u[i] * k + j] / G_rt[ix_u[i] * k + j] * L_sh[tmp_ix * k + j] / tmp_L_rt
-                    exp_T_dot_B[i] += G_sh[ix_u[i] * k + j] / G_rt[ix_u[i] * k + j] * L_sh[tmp_ix * k + j] / L_rt[
+                    exp_T_dot_B[i] -= (G_sh[ix_u[i] * k + j] - 1) / G_rt[ix_u[i] * k + j] * (L_sh[tmp_ix * k + j] - 1) / tmp_L_rt
+                    exp_T_dot_B[i] += (G_sh[ix_u[i] * k + j] - 1) / G_rt[ix_u[i] * k + j] * (L_sh[tmp_ix * k + j] - 1) / L_rt[
                         tmp_ix * k + j]
             with gil:
                 tmp_time -= time.time()
-                sys.stdout.write('\rupdate_G_n_L_rt (%d / %d) %.2f iter / s' % (count, k * (nU + nI), 1 / abs(tmp_time)))
+                sys.stdout.write('\rupdate_G_n_L_rt (%d / %d) %10.2f iter / micro s' % (count, k * (nU + nI), 1 / (abs(tmp_time) * 1e6)))
                 count += 1
     with gil:
         sys.stdout.write('\r')
